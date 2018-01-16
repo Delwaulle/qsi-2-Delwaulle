@@ -22,20 +22,22 @@ export function loginUser({ email, password }) {
     where: {
       email,
     },
-  }).then(
-    user =>
-      user && !user.deletedAt
-        ? Promise.all([
-            _.omit(
-              user.get({
-                plain: true,
-              }),
-              Users.excludeAttributes
-            ),
-            user.comparePassword(password),
-          ])
-        : Promise.reject(new Error('UNKOWN OR DELETED USER'))
-  );
+  })
+    .then(
+      user =>
+        user && !user.deletedAt
+          ? Promise.all([
+              _.omit(
+                user.get({
+                  plain: true,
+                }),
+                Users.excludeAttributes
+              ),
+              user.comparePassword(password),
+            ])
+          : Promise.reject(new Error('UNKOWN OR DELETED USER'))
+    )
+    .then(user => user[0]);
 }
 
 export function getUser({ id }) {
@@ -53,5 +55,17 @@ export function getUser({ id }) {
             Users.excludeAttributes
           )
         : Promise.reject(new Error('UNKOWN OR DELETED USER'))
+  );
+}
+
+export function updateUser(userToUpdate) {
+  return Users.update(userToUpdate, { where: { id: userToUpdate.id } }).then(
+    updatedUser => updatedUser
+  );
+}
+
+export function deleteUser(userToDelete) {
+  return Users.destroy({ where: { id: userToDelete.id } }).then(
+    deletedUser => deletedUser
   );
 }

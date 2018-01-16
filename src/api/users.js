@@ -1,6 +1,11 @@
 import express from 'express';
 import jwt from 'jwt-simple';
-import { createUser, loginUser } from '../business/users';
+import {
+  createUser,
+  loginUser,
+  updateUser,
+  deleteUser,
+} from '../business/users';
 import logger from '../logger';
 
 export const apiUsers = express.Router();
@@ -90,11 +95,65 @@ apiUsers.post(
           })
 );
 
+// PROTECTED
+
 export const apiUsersProtected = express.Router();
+
 apiUsersProtected.get('/', (req, res) =>
   res.status(200).send({
     success: true,
     profile: req.user,
     message: 'user logged in',
   })
+);
+
+apiUsersProtected.put(
+  '/',
+  (req, res) =>
+    !req.body.id
+      ? res.status(400).send({
+          success: false,
+          message: 'ID is mandatory for updating a user account',
+        })
+      : updateUser(req.body)
+          .then(user => {
+            const token = jwt.encode({ id: user.id }, process.env.JWT_SECRET);
+            return res.status(200).send({
+              success: true,
+              token: `JWT ${token}`,
+              profile: user,
+              message: 'user successfully updated',
+            });
+          })
+          .catch(err => {
+            logger.error(`💥 Failed to update user : ${err.stack}`);
+            return res.status(500).send({
+              success: false,
+              message: `${err.name} : ${err.message}`,
+            });
+          })
+);
+
+apiUsersProtected.delete(
+  '/',
+  (req, res) =>
+    !req.body.id
+      ? res.status(400).send({
+          success: false,
+          message: 'ID is mandatory for deleting a user',
+        })
+      : deleteUser(req.body)
+          .then(() =>
+            res.status(200).send({
+              success: true,
+              message: 'user successfully removed',
+            })
+          )
+          .catch(err => {
+            logger.error(`💥 Failed to delete the user : ${err.stack}`);
+            return res.status(500).send({
+              success: false,
+              message: `${err.name} : ${err.message}`,
+            });
+          })
 );
