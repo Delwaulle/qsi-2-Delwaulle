@@ -99,6 +99,17 @@ apiUsers.post(
 
 export const apiUsersProtected = express.Router();
 
+/**
+ * @api {get} /users logged user informations
+ * @apiVersion 1.0.0
+ * @apiName getUser
+ * @apiGroup Users
+ *
+ *
+ * @apiSuccess {BOOLEAN} success Success.
+ * @apiSuccess {STRING} message Message.
+ * @apiSuccess {JSON} profile Profile informations about the User.
+ */
 apiUsersProtected.get('/', (req, res) =>
   res.status(200).send({
     success: true,
@@ -107,15 +118,30 @@ apiUsersProtected.get('/', (req, res) =>
   })
 );
 
+/**
+ * @api {update} /users update User
+ * @apiVersion 1.0.0
+ * @apiName updateUser
+ * @apiGroup Users
+ *
+ * @apiParam {STRING} password  user's password.
+ * @apiParam {STRING} firstName user's firstName.
+ * @apiParam {STRING} lastName user's lastName.
+ *
+ * @apiSuccess {BOOLEAN} success Success.
+ * @apiSuccess {STRING} message Message.
+ * @apiSuccess {STRING} token JWT token.
+ * @apiSuccess {JSON} profile Profile informations about the User.
+ */
 apiUsersProtected.put(
   '/',
   (req, res) =>
-    !req.body.id
+    !req.user.id
       ? res.status(400).send({
           success: false,
           message: 'ID is mandatory for updating a user account',
         })
-      : updateUser(req.body)
+      : updateUser(req.body, req.user.id)
           .then(user => {
             const token = jwt.encode({ id: user.id }, process.env.JWT_SECRET);
             return res.status(200).send({
@@ -134,15 +160,24 @@ apiUsersProtected.put(
           })
 );
 
+/**
+ * @api {delete} /users User deletion
+ * @apiVersion 1.0.0
+ * @apiName deleteUser
+ * @apiGroup Users
+ *
+ * @apiSuccess {BOOLEAN} success Success.
+ * @apiSuccess {STRING} message Message.
+ */
 apiUsersProtected.delete(
   '/',
   (req, res) =>
-    !req.body.id
+    !req.user.id
       ? res.status(400).send({
           success: false,
           message: 'ID is mandatory for deleting a user',
         })
-      : deleteUser(req.body)
+      : deleteUser(req.user.id)
           .then(() =>
             res.status(200).send({
               success: true,

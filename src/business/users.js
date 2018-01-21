@@ -58,14 +58,33 @@ export function getUser({ id }) {
   );
 }
 
-export function updateUser(userToUpdate) {
-  return Users.update(userToUpdate, { where: { id: userToUpdate.id } }).then(
-    updatedUser => updatedUser
-  );
+export function updateUser(userToUpdate, userId) {
+  return Users.update(
+    {
+      email: userToUpdate.email,
+      firstName: userToUpdate.firstName,
+      lastName: userToUpdate.lastName,
+      hash: userToUpdate.password,
+    },
+    {
+      where: {
+        id: userId,
+      },
+      returning: true,
+    }
+  ).then(result => {
+    const user = result[1][0];
+    return _.omit(
+      user.get({
+        plain: true,
+      }),
+      Users.excludeAttributes
+    );
+  });
 }
 
-export function deleteUser(userToDelete) {
-  return Users.destroy({ where: { id: userToDelete.id } }).then(
-    deletedUser => deletedUser
-  );
+export function deleteUser(userId) {
+  return Users.destroy({
+    where: { id: userId },
+  }).then(deletedUser => deletedUser);
 }
