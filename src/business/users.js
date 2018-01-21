@@ -85,6 +85,8 @@ export function updateUser(userToUpdate, userId) {
 
 export function deleteUser(userId) {
   return Users.destroy({
-    where: { id: userId },
-  }).then(deletedUser => deletedUser);
+    where: {
+      id: userId,
+    },
+  });
 }

@@ -66,6 +66,10 @@ export default (sequelize, DataTypes) => {
     }
   );
 
+  Users.associate = models => {
+    Users.hasMany(models.Posts);
+  };
+
   // we don't want to send password even if crypted
   Users.excludeAttributes = ['hash'];
 

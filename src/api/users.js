@@ -119,7 +119,7 @@ apiUsersProtected.get('/', (req, res) =>
 );
 
 /**
- * @api {update} /users update User
+ * @api {put} /users update User
  * @apiVersion 1.0.0
  * @apiName updateUser
  * @apiGroup Users
